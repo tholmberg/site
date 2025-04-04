@@ -1,11 +1,14 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-async function getNoteSlugs(dir: string) {
+const baseUrl = 'https://site-production-52fb.up.railway.app';
+
+async function getSlugs(dir: string) {
   const entries = await fs.readdir(dir, {
     recursive: true,
     withFileTypes: true,
   });
+
   return entries
     .filter((entry) => entry.isFile() && entry.name === 'page.mdx')
     .map((entry) => {
@@ -19,18 +22,18 @@ async function getNoteSlugs(dir: string) {
 }
 
 export default async function sitemap() {
-  const notesDirectory = path.join(process.cwd(), 'app', 'n');
-  const slugs = await getNoteSlugs(notesDirectory);
+  const rantingsDirectory = path.join(process.cwd(), 'app', 'rantings');
+  const slugs = await getSlugs(rantingsDirectory);
 
-  const notes = slugs.map((slug) => ({
-    url: `https://leerob.com/n/${slug}`,
+  const rantings = slugs.map((slug) => ({
+    url: `${baseUrl}/rantings/${slug}`,
     lastModified: new Date().toISOString(),
   }));
 
-  const routes = ['', '/work'].map((route) => ({
-    url: `https://leerob.com${route}`,
+  const routes = ['', '/resume', '/hacks', '/photos'].map((route) => ({
+    url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString(),
   }));
 
-  return [...routes, ...notes];
+  return [...routes, ...rantings];
 }
